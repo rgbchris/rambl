@@ -6,6 +6,9 @@
 // var pattern = new RegExp('s$');
 
 
+// - chars with special meaning
+// - ^ $ . * + ? = ! : | \ / ( ) [ ] { }
+
 function Rgx(str) {
   this.chain = '';
   this.value = str || '';
@@ -66,6 +69,9 @@ Rgx.prototype.any = function(str) {
     return this;
 }
 
+// escapes special characters...
+// ^ $ . * + ? = ! : | \ / ( ) [ ] { }
+Rgx.prototype.literal = function() {}
 
 var str = new Rgx("myteststring");
 
