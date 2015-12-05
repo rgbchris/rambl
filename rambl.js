@@ -100,7 +100,7 @@ Rgx.prototype.if = function(str) {
   return this;
 }
 
-Rgx.prototype.sees = function(str) {
+Rgx.prototype.see = function(str) {
   this.chain += str;
   return this;
 }
@@ -123,7 +123,7 @@ Rgx.prototype.groupOf = function(subexpression) {
   return this;
 }
 
-Rgx.prototype.or = or = function(str) {
+Rgx.prototype.or = function(str) {
   this.chain += ('|' + str);
   return this;
 }
