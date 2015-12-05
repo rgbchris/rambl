@@ -1,3 +1,4 @@
 # rambl.js
 
-## Aimed to be a more powerful, verbose, human-readable abstraction on top of the JavaScript regular expression engine,  but in reality just some fun weekend project  useless-ware.
+Useless-ware experiment aimed at being an equally powerful, more verbose, human-readable abstraction on top of JavaScript's regular expression engine.
+
