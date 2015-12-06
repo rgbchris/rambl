@@ -5,10 +5,11 @@ Useless-ware experiment aimed at being an equally powerful, more verbose, human-
 ## Examples 
 
 ```javascript
-let rmblObj = rmbl.see('<')
+let rmblObj = rmbl.sees('<')
                   .then
                   .zeroOrMore('whitespaces')
+                  .then
                   .either((s) => s.see('s'), 
                           (s) => s.see('ae'))
-                  .run();
+                  .end();
 ```

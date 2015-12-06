@@ -1,4 +1,7 @@
+"use strict";
+
 var parser = require('./lib/parser');
+var utils  = require('./lib/utils');
 
 /**
  * \d is the same as [0-9]
@@ -9,10 +12,6 @@ var parser = require('./lib/parser');
  * [^aeou] - any character except ‘a’,’e’,’o’,’u’
  * [^0-9]  - any non-digit, same as \D
  * [^\s]   - any not-a-space, same as \S
- *
- *
- *
- *
  */
 
 function Rgx(id) {
@@ -20,9 +19,8 @@ function Rgx(id) {
   this.str = null; // string to test
   this.method = null; // e.g. test, exec, etc...
 
-  this.sentencing = null;
-
-  this.captureStack = [];
+  this.backtrack; // flag determining if we need to prepend next chain item
+  this.modifiers = [];
 
   init.call(this);
 }
@@ -82,6 +80,20 @@ function init() {
     return this;
   });
 
+  addProp.call(this, 'words', function() {
+    let chain = this.chain;
+    let indx;
+    // this needs to go on most chainable properties
+    if (this.backtrack && chain.slice(-1) === "}") {
+      indx  = chain.lastIndexOf("{");
+      chain = utils.interpolate(chain, parser('words'), indx);
+      this.backtrack = false;
+    } else {
+      chain += parser("words");
+    }
+    return this;
+  });
+
   addProp.call(this, 'digit', function() {
     this.chain += '\d'; // [0-9]
     return this;
@@ -91,7 +103,6 @@ function init() {
 Rgx.prototype._empty = function() {
   this.str = '';
   this.chain = '';
-  this.captureStack.length = 0;
 }
 
 
@@ -106,7 +117,7 @@ Rgx.prototype.see = function(str) {
 }
 
 
-Rgx.prototype.run = function(flags) {
+Rgx.prototype.end = function(flags) {
   var rgxObj = new RegExp(this.chain);
   // var result = rgxObj.test(this.str, flags);
   // this._empty();
@@ -146,6 +157,13 @@ Rgx.prototype.range = function(from, to) {
 /**
  *
  */
+
+Rgx.prototype.except = function(str) {
+  if (this.modifiers.slice(-1).pop() === 'any') {
+    this.chain += `[^${str}]`;
+  }
+  return this;
+}
 
 Rgx.prototype.either = function(before, after) {
   if (typeof before !== "function") {
@@ -214,7 +232,8 @@ Rgx.prototype.between = function(n, m, str) {
   }
 
   if (valid) {
-    str = parser(str);
+    this.backtrack = true;
+    str = str ? parser(str) : '';
     this.chain += `${str}{${n},${m}}`;
   }
   return this;

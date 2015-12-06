@@ -13,7 +13,11 @@ let rmbl  = new Rambl();
 let rmblObj = rmbl.groupOf((s) => {
                     s.range('A','Z');
                   })
-                  .between(0, 1, 'words')
+                  // .oneOrMore('words')
+                  // .between(0, 1, 'words')
+                  .then
+                  .between(0, 1)
+                  .words
                   .run();
 
 
