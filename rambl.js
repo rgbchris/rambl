@@ -113,12 +113,12 @@ Rgx.prototype.run = function(flags) {
   return rgxObj;
 }
 
-Rgx.prototype.groupOf = function(subexpression) {
-  if (typeof group !== "function") {
+Rgx.prototype.groupOf = function(subexp) {
+  if (typeof subexp !== "function") {
     throw "Whoops!";
   }
   this.chain += '(';
-  subexpression.call(this, this);
+  subexp.call(this, this);
   this.chain += ')';
   return this;
 }
@@ -128,10 +128,33 @@ Rgx.prototype.or = function(str) {
   return this;
 }
 
+Rgx.prototype.range = function(from, to) {
+  var valid;
+  try {
+    new RegExp(`[${from}-${to}]`)
+    valid = true;
+  } catch (e) {
+    valid = false;
+    console.error(e);
+  }
+
+  if (valid) {
+    this.chain += `[${from}-${to}]`;
+  }
+}
+
+/**
+ *
+ */
+
 Rgx.prototype.either = function(before, after) {
-  if (typeof before !== "function" || typeof after !== "function") {
+  if (typeof before !== "function") {
     throw "Whoops!";
   }
+  if (typeof after !== "function") {
+    before.call(this, this);
+  }
+
   before.call(this, this);
   this.chain += '|';
   after.call(this, this);
@@ -167,10 +190,11 @@ Rgx.prototype.zeroOrMore = function(str, lazy) {
 }
 
 // '+' - equiv {1,}
-Rgx.prototype.oneOrMore = function(str, lazy) {
-    str = parser(str);
-    this.chain += (str + "+" + (lazy ? "?" : ""));
-    return this;
+Rgx.prototype.oneOrMore  = 
+Rgx.prototype.atLeastOne = function(str, lazy) {
+  str = parser(str);
+  this.chain += (str + "+" + (lazy ? "?" : ""));
+  return this;
 }
 
 // '?' - equiv {0,1}
@@ -178,6 +202,22 @@ Rgx.prototype.zeroOrOne = function(str, lazy) {
     str = parser(str);
     this.chain += (str + "?" + (lazy ? "?" : ""));
     return this;
+}
+
+Rgx.prototype.between = function(n, m, str) {
+  var valid = true;
+  try {
+    new RegExp(`0{${n},${m}}`)
+  } catch (e) {
+    valid = false;
+    console.error(e);
+  }
+
+  if (valid) {
+    str = parser(str);
+    this.chain += `${str}{${n},${m}}`;
+  }
+  return this;
 }
 
 module.exports = Rgx;
