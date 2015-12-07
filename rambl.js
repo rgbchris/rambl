@@ -124,6 +124,13 @@ Rgx.prototype.end = function(flags) {
   return rgxObj;
 }
 
+Rgx.prototype.setOf = function(subexp) {
+  if (typeof subexp !== 'function') return;
+  
+
+}
+
+
 Rgx.prototype.groupOf = function(subexp) {
   if (typeof subexp !== "function") {
     throw "Whoops!";
@@ -182,14 +189,21 @@ Rgx.prototype.either = function(before, after) {
 // Special Characters for Regular Expressions
 
 // '\'
-Rgx.prototype.special = function(str) {
-    // var rgxObj = new RegExp('\' + str);
-    this.chain += ("\\" + str);
+Rgx.prototype.special = 
+Rgx.prototype.literal = 
+Rgx.prototype.literals = function(str) {
+    if (str.length > 1) {
+      str.split('').map((char) => `\${char}`).join();
+    } else {
+      // var rgxObj = new RegExp('\' + str);
+      this.chain += ("\\" + str);
+    }
     return this;
 }
 
 // '^'
-Rgx.prototype.startsWith = function() {
+Rgx.prototype.startsWith = 
+Rgx.prototype.startWith  = function() {
     this.chain += ("^" + str);
     return this;
 }
@@ -201,6 +215,9 @@ Rgx.prototype.endsWith = function(str, lazy) {
 }
 
 // '*' - equiv. {0,}
+Rgx.prototype.any = 
+Rgx.prototype.anyAmountOf = 
+Rgx.prototype.zeroOrMoreOf = 
 Rgx.prototype.zeroOrMore = function(str, lazy) {
     str = parser(str);
     this.chain += (str + "*" + (lazy ? "?" : ""));

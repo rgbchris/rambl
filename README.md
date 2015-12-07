@@ -13,3 +13,24 @@ let rmblObj = rmbl.sees('<')
                           (s) => s.see('ae'))
                   .end();
 ```
+
+Comment Removal Regular Expression
+```javascript
+let rmblObj = rmbl.sees.literals('/*')
+                  .then.zeroOrMore((str) => {
+                    str.sees.whitespaces
+                       .or
+                       .non.whitespaces;
+                  }, 'lazy')
+                  .then.literals('*/')
+                  .or
+                  .a.literal('/')
+                  .then.a.literal('/')
+                  .then.zeroOrMoreOf('anything')
+                  .end('g')
+```
+
+```javascript
+.sees.a.literal('/').then.a.literal('*');
+.sees.literals('/*');
+```
