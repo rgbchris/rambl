@@ -16,6 +16,8 @@ let rmblObj = rmbl.sees('<')
 
 Comment Removal Regular Expression
 ```javascript
+// /\/\*[\s\S]*?\*\/|\/\/.*/g
+
 let rmblObj = rmbl.sees.literals('/*')
                   .then.zeroOrMore((str) => {
                     str.sees.whitespaces
@@ -28,6 +30,17 @@ let rmblObj = rmbl.sees.literals('/*')
                   .then.a.literal('/')
                   .then.zeroOrMoreOf('anything')
                   .end('g')
+```
+
+```javascript
+/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?'])']/g
+
+let rmblObj = rmbl.groupOf((s) => {
+                    s.range('a','z')
+                     .range(0, 9)
+                     .sees('!#$%&i\'')
+                  })
+                  .end();
 ```
 
 ```javascript
