@@ -21,6 +21,7 @@ function Rgx(id) {
 
   this.backtrack; // flag determining if we need to prepend next chain item
   this.modifiers = [];
+  this.negation = false;
 
   init.call(this);
 }
@@ -51,12 +52,13 @@ function init() {
     });
   }, this);
 
-  // one.or.more => + (of preceding)
-  // zero.or.one => ? (of preceding)
+  // one.or.more  => + (of preceding)
+  // zero.or.one  => ? (of preceding)
   // zero.or.more => * (of preceding)
 
   addProp.call(this, 'non', function() {
     // should just capitalize whatever comes next, in order to negate?
+    this.negation = true;
     return this;
   });
 
@@ -81,21 +83,12 @@ function init() {
   });
 
   addProp.call(this, 'words', function() {
-    let chain = this.chain;
-    let indx;
-    // this needs to go on most chainable properties
-    if (this.backtrack && chain.slice(-1) === "}") {
-      indx  = chain.lastIndexOf("{");
-      chain = utils.interpolate(chain, parser('words'), indx);
-      this.backtrack = false;
-    } else {
-      chain += parser("words");
-    }
+    utils.backtracker(this.backtrack, this.chain, 'words');
     return this;
   });
 
   addProp.call(this, 'digit', function() {
-    this.chain += '\d'; // [0-9]
+    utils.backtracker(this.backtrack, this.chain, 'digit');
     return this;
   });
 }
@@ -130,6 +123,15 @@ Rgx.prototype.setOf = function(subexp) {
 
 }
 
+Rgx.prototype.nonCapturingGroupOf = function(subexp) {
+  if (typeof subexp !== "function") {
+    throw "Whoops!";
+  }
+  this.chain += '(?:';
+  subexp.call(this, this);
+  this.chain += ')';
+  return this;
+}
 
 Rgx.prototype.groupOf = function(subexp) {
   if (typeof subexp !== "function") {
@@ -186,12 +188,17 @@ Rgx.prototype.either = function(before, after) {
   return this;
 }
 
-// Special Characters for Regular Expressions
 
-// '\'
-Rgx.prototype.special = 
-Rgx.prototype.literal = 
-Rgx.prototype.literals = function(str) {
+/**
+ * Special Characters for Regular Expressions, e.g. `\` 
+ * @param
+ * @namespace
+ * @name
+ * @api public
+ */
+
+['specialChar', 'literal', 'literals'].forEach(function(key) {
+  Rgx.prototype[key] = function(str) {
     if (str.length > 1) {
       str.split('').map((char) => `\${char}`).join();
     } else {
@@ -199,7 +206,11 @@ Rgx.prototype.literals = function(str) {
       this.chain += ("\\" + str);
     }
     return this;
-}
+  }
+})
+
+Rgx.prototype.snippet = function() {
+};
 
 // '^'
 Rgx.prototype.startsWith = 
@@ -249,7 +260,7 @@ Rgx.prototype.between = function(n, m, str) {
   }
 
   if (valid) {
-    this.backtrack = true;
+    this.backtrack = 'quantifier';
     str = str ? parser(str) : '';
     this.chain += `${str}{${n},${m}}`;
   }
